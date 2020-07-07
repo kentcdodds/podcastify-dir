@@ -25,7 +25,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "node .",
+    "start": "node index.js",
     "build": "kcd-scripts build",
     "lint": "kcd-scripts lint",
     "setup": "npm install && npm run validate -s",
