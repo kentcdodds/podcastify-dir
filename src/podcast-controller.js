@@ -47,9 +47,11 @@ function getPodcastMiddleware({
 
             function getNativeValue(nativeId) {
               try {
-                return metadata.native['ID3v2.3'].find(
-                  item => item.id === nativeId,
-                ).value
+                for (const nativeMetadata of Object.values(metadata.native)) {
+                  return nativeMetadata.find(
+                    item => item.id.toLowerCase() === nativeId.toLowerCase(),
+                  ).value
+                }
               } catch (error) {
                 // the value probably doesn't exist...
                 return ''
@@ -76,6 +78,7 @@ function getPodcastMiddleware({
               genre: category,
               release_date: date = getNativeValue('TXXX:year'),
             } = audibleMetadata
+
             const {
               picture: [picture = getNativeValue('APIC')] = [],
             } = metadata.common
@@ -281,5 +284,6 @@ export {getPodcastMiddleware}
 eslint
   max-lines-per-function: "off",
   no-inner-declarations: "off",
-  consistent-return: "off"
+  consistent-return: "off",
+  "babel/camelcase": "off",
 */
