@@ -51,7 +51,11 @@ function getPodcastMiddleware({
                   item => item.id.toLowerCase() === nativeId.toLowerCase(),
                 )
                 if (foundItem) {
-                  return foundItem.value
+                  if (foundItem.value.text) {
+                    return foundItem.value.text
+                  } else {
+                    return foundItem.value
+                  }
                 }
               }
               // the value probably doesn't exist...
@@ -69,7 +73,8 @@ function getPodcastMiddleware({
             }
             const {
               title = metadata.common.title,
-              summary: description = getNativeValue('TXXX:comment'),
+              summary: description = getNativeValue('TXXX:comment') ||
+                getNativeValue('COMM:comment'),
               asin: id = metadata.common.asin,
               author = metadata.common.artist,
               copyright = metadata.common.copyright,
