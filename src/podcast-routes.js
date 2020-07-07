@@ -2,11 +2,15 @@ import express from 'express'
 import basicAuth from 'express-basic-auth'
 import {getPodcastMiddleware} from './podcast-controller'
 
-function getPodcastRoutes({title, directory, users} = {}) {
+function getPodcastRoutes({title, directory, users, description} = {}) {
   // eslint-disable-next-line babel/new-cap
   const router = express.Router()
 
-  const {feed, image, audio} = getPodcastMiddleware({title, directory})
+  const {feed, image, audio} = getPodcastMiddleware({
+    title,
+    description,
+    directory,
+  })
   router.use(basicAuth({users, challenge: true}))
 
   const asyncMiddleware = mid => (req, res, next) =>

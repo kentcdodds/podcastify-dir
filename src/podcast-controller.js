@@ -6,7 +6,11 @@ import convert from 'xml-js'
 
 const atob = data => Buffer.from(data, 'base64').toString()
 
-function getPodcastMiddleware({title: podcastTitle, directory}) {
+function getPodcastMiddleware({
+  title: podcastTitle,
+  description: podcastDescription,
+  directory,
+}) {
   let cache = {}
   async function getFileMetadata(id) {
     if (!cache[id]) {
@@ -175,7 +179,7 @@ function getPodcastMiddleware({title: podcastTitle, directory}) {
           ],
           title: podcastTitle,
           link: getResourceUrl(),
-          description: getResourceUrl(),
+          description: podcastDescription,
           lastBuildDate: new Date().toUTCString(),
           generator: getResourceUrl(),
         },

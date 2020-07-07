@@ -8,6 +8,7 @@ logger.setLevel(logLevel)
 
 startServer({
   title: 'Dodds Family Audiobooks',
+  description: 'The audio books of the Dodds Family',
   port: process.env.PORT ?? 8765,
   directory: '/Users/kentcdodds/Library/OpenAudible/mp3',
   users: {bob: 'the_builder'},
