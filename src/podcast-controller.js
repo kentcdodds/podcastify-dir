@@ -123,14 +123,9 @@ function getPodcastMiddleware({
 
   async function feed(req, res) {
     const baseUrl = new URL(
-      [
-        req.secure ? 'https' : 'http',
-        '://',
-        atob(req.get('authorization').split(' ')[1]),
-        '@',
-        req.get('host'),
-        req.baseUrl,
-      ].join(''),
+      [req.secure ? 'https' : 'http', '://', req.get('host'), req.baseUrl].join(
+        '',
+      ),
     )
 
     function getResourceUrl(id = '') {

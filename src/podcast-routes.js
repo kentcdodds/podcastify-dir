@@ -11,12 +11,15 @@ function getPodcastRoutes({title, directory, users, description} = {}) {
     description,
     directory,
   })
-  router.use(basicAuth({users, challenge: true}))
 
   const asyncMiddleware = mid => (req, res, next) =>
     mid(req, res).catch(e => next(e))
 
-  router.get('/feed.xml', asyncMiddleware(feed))
+  router.get(
+    '/feed.xml',
+    basicAuth({users, challenge: true}),
+    asyncMiddleware(feed),
+  )
   router.get('/:id/image', asyncMiddleware(image))
   router.get('/:id/audio.mp3', asyncMiddleware(audio))
 
