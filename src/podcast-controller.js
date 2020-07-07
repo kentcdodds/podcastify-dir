@@ -46,16 +46,16 @@ function getPodcastMiddleware({
             }
 
             function getNativeValue(nativeId) {
-              try {
-                for (const nativeMetadata of Object.values(metadata.native)) {
-                  return nativeMetadata.find(
-                    item => item.id.toLowerCase() === nativeId.toLowerCase(),
-                  ).value
+              for (const nativeMetadata of Object.values(metadata.native)) {
+                const foundItem = nativeMetadata.find(
+                  item => item.id.toLowerCase() === nativeId.toLowerCase(),
+                )
+                if (foundItem) {
+                  return foundItem.value
                 }
-              } catch (error) {
-                // the value probably doesn't exist...
-                return ''
               }
+              // the value probably doesn't exist...
+              return ''
             }
 
             const json64 = getNativeValue('TXXX:json64')
