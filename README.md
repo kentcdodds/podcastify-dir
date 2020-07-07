@@ -1,5 +1,5 @@
 <div align="center">
-<h1>podcastify-dir</h1>
+<h1>@kentcdodds/podcastify-dir</h1>
 
 <p>Take a directory of audio files and syndicate them with an rss feed</p>
 </div>
@@ -49,7 +49,7 @@ This module is distributed via [npm][npm] which is bundled with [node][node] and
 should be installed as one of your project's `dependencies`:
 
 ```
-npm install --save podcastify-dir
+npm install --save @kentcdodds/podcastify-dir
 ```
 
 ## Usage
@@ -115,11 +115,11 @@ MIT
 [build]: https://travis-ci.com/kentcdodds/podcastify-dir
 [coverage-badge]: https://img.shields.io/codecov/c/github/kentcdodds/podcastify-dir.svg?style=flat-square
 [coverage]: https://codecov.io/github/kentcdodds/podcastify-dir
-[version-badge]: https://img.shields.io/npm/v/podcastify-dir.svg?style=flat-square
-[package]: https://www.npmjs.com/package/podcastify-dir
-[downloads-badge]: https://img.shields.io/npm/dm/podcastify-dir.svg?style=flat-square
-[npmtrends]: http://www.npmtrends.com/podcastify-dir
-[license-badge]: https://img.shields.io/npm/l/podcastify-dir.svg?style=flat-square
+[version-badge]: https://img.shields.io/npm/v/@kentcdodds/podcastify-dir.svg?style=flat-square
+[package]: https://www.npmjs.com/package/@kentcdodds/podcastify-dir
+[downloads-badge]: https://img.shields.io/npm/dm/@kentcdodds/podcastify-dir.svg?style=flat-square
+[npmtrends]: http://www.npmtrends.com/@kentcdodds/podcastify-dir
+[license-badge]: https://img.shields.io/npm/l/@kentcdodds/podcastify-dir.svg?style=flat-square
 [license]: https://github.com/kentcdodds/podcastify-dir/blob/master/LICENSE
 [prs-badge]: https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square
 [prs]: http://makeapullrequest.com
