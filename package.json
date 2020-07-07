@@ -1,0 +1,57 @@
+{
+  "name": "@kentcdodds/podcastify-dir",
+  "version": "0.0.0-semantically-released",
+  "publishConfig": {
+    "access": "public"
+  },
+  "description": "Take a directory of audio files and syndicate them with an rss feed",
+  "main": "dist/index.js",
+  "keywords": [],
+  "author": "Kent C. Dodds <me@kentcdodds.com> (https://kentcdodds.com)",
+  "license": "MIT",
+  "engines": {
+    "node": ">=10",
+    "npm": ">=6"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kentcdodds/podcastify-dir"
+  },
+  "bugs": {
+    "url": "https://github.com/kentcdodds/podcastify-dir/issues"
+  },
+  "homepage": "https://github.com/kentcdodds/podcastify-dir#readme",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "start": "node .",
+    "build": "kcd-scripts build",
+    "lint": "kcd-scripts lint",
+    "setup": "npm install && npm run validate -s",
+    "test": "kcd-scripts test",
+    "test:update": "npm test -- --updateSnapshot --coverage",
+    "validate": "kcd-scripts validate"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.10.4",
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
+    "loglevel": "^1.6.8",
+    "music-metadata": "^6.4.0",
+    "xml-js": "^1.6.11"
+  },
+  "devDependencies": {
+    "@babel/register": "^7.10.4",
+    "kcd-scripts": "^6.2.4",
+    "nodemon": "^2.0.4"
+  },
+  "eslintConfig": {
+    "extends": "./node_modules/kcd-scripts/eslint.js"
+  },
+  "eslintIgnore": [
+    "node_modules",
+    "coverage",
+    "dist"
+  ]
+}
