@@ -260,8 +260,9 @@ function getPodcastMiddleware({
     }
 
     res.set('Content-Type', 'text/xml')
+    const finalObj = modifyXmlJs(xmlObj)
     res.send(
-      convert.js2xml(modifyXmlJs(xmlObj), {
+      convert.js2xml(finalObj, {
         compact: true,
         ignoreComment: true,
         spaces: 2,
