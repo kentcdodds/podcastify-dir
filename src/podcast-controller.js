@@ -9,6 +9,7 @@ const atob = data => Buffer.from(data, 'base64').toString()
 
 function getPodcastMiddleware({
   title: podcastTitle,
+  image: podcastImage,
   description: podcastDescription,
   directory,
 }) {
@@ -202,6 +203,16 @@ function getPodcastMiddleware({
               : podcastDescription,
           },
           lastBuildDate: new Date().toUTCString(),
+          image: req.query['image.url']
+            ? {
+                link: req.query['image.link'],
+                title: req.query['image.title'],
+                description: req.query['image.description'],
+                height: req.query['image.height'],
+                width: req.query['image.width'],
+                url: req.query['image.url'],
+              }
+            : podcastImage,
           generator: getResourceUrl(),
         },
         item: items.map(item => {
