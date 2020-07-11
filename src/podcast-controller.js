@@ -194,9 +194,13 @@ function getPodcastMiddleware({
               },
             },
           ],
-          title: podcastTitle,
+          title: req.query.title || podcastTitle,
           link: getResourceUrl(),
-          description: podcastDescription,
+          description: {
+            _cdata: req._parsedUrl.query
+              ? `<p>${podcastDescription}</p>\n\n<p>query: ${req._parsedUrl.query}</p>`
+              : podcastDescription,
+          },
           lastBuildDate: new Date().toUTCString(),
           generator: getResourceUrl(),
         },
