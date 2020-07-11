@@ -11,6 +11,7 @@ function getPodcastMiddleware({
   title: podcastTitle,
   image: podcastImage,
   description: podcastDescription,
+  modifyXmlJs = xmlJs => xmlJs,
   directory,
 }) {
   let cache = {}
@@ -260,7 +261,11 @@ function getPodcastMiddleware({
 
     res.set('Content-Type', 'text/xml')
     res.send(
-      convert.js2xml(xmlObj, {compact: true, ignoreComment: true, spaces: 2}),
+      convert.js2xml(modifyXmlJs(xmlObj), {
+        compact: true,
+        ignoreComment: true,
+        spaces: 2,
+      }),
     )
 
     function getResourceUrl(id = '') {
