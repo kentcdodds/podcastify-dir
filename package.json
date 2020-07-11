@@ -37,8 +37,9 @@
     "@babel/runtime": "^7.10.4",
     "express": "^4.17.1",
     "express-basic-auth": "^1.2.0",
+    "fast-sort": "^2.2.0",
     "loglevel": "^1.6.8",
-    "music-metadata": "^6.4.0",
+    "music-metadata": "^7.0.0",
     "xml-js": "^1.6.11"
   },
   "devDependencies": {

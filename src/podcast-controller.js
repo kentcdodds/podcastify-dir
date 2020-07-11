@@ -1,6 +1,7 @@
 import * as fs from 'fs'
 import path from 'path'
 import logger from 'loglevel'
+import sort from 'fast-sort'
 import * as mm from 'music-metadata'
 import convert from 'xml-js'
 
@@ -92,11 +93,11 @@ function getPodcastMiddleware({
               id,
               title,
               author,
-              date: new Date(date),
+              pubDate: new Date(date),
 
               description,
               content: description,
-              category,
+              category: category?.split?.(':').map(c => c.trim()),
 
               guid: id,
 
@@ -110,7 +111,6 @@ function getPodcastMiddleware({
                 .split(',')
                 .map(name => ({name: name.trim()})),
 
-              published: new Date(date),
               copyright,
               filepath,
             }
@@ -130,27 +130,41 @@ function getPodcastMiddleware({
   }
 
   async function feed(req, res) {
-    const baseUrl = new URL(
-      [req.secure ? 'https' : 'http', '://', req.get('host'), req.baseUrl].join(
-        '',
-      ),
-    )
+    let items = Object.values(await getFilesMetadata())
 
-    function getResourceUrl(id = '') {
-      const resourceUrl = new URL(baseUrl.toString())
-      if (!resourceUrl.pathname.endsWith('/')) {
-        resourceUrl.pathname = `${resourceUrl.pathname}/`
+    // filter in/out
+    const filterInOptions = (req.query.filterIn ?? '')
+      .split(',')
+      .filter(Boolean)
+      .map(set => {
+        const [regexString, prop] = set.split(':')
+        return {regex: new RegExp(regexString, 'im'), prop}
+      })
+    const filterOutOptions = (req.query.filterOut ?? '')
+      .split(',')
+      .filter(Boolean)
+      .map(set => {
+        const [regexString, prop] = set.split(':')
+        return {regex: new RegExp(regexString, 'im'), prop}
+      })
+    items = items.filter(item => {
+      for (const {regex, prop} of filterInOptions) {
+        if (!item.hasOwnProperty(prop)) return false
+        if (!regex.test(item[prop])) return false
       }
-      if (id.startsWith('/')) {
-        id = id.slice(1)
+      for (const {regex, prop} of filterOutOptions) {
+        if (!item.hasOwnProperty(prop)) break
+        if (regex.test(item[prop])) return false
       }
-      resourceUrl.pathname = resourceUrl.pathname + id
-      return resourceUrl.toString()
-    }
+      return true
+    })
 
-    const items = Object.values(await getFilesMetadata()).sort((a, b) =>
-      a.date.getTime() < b.date.getTime() ? 1 : -1,
-    )
+    // sort
+    const sortOptions = (req.query.sort ?? 'desc:date').split(',').map(set => {
+      const [dir, prop] = set.split(':')
+      return {[dir]: i => i[prop]}
+    })
+    items = sort([...items]).by(sortOptions)
 
     const xmlObj = {
       _declaration: {_attributes: {version: '1.0', encoding: 'utf-8'}},
@@ -191,18 +205,21 @@ function getPodcastMiddleware({
             id,
             title,
             description,
-            date,
+            pubDate,
+            category,
             author,
             duration,
             size,
             type,
           } = item
-          return {
+
+          return removeEmpty({
             guid: {_attributes: {isPermaLink: false}, _text: id},
             title,
             description: {_cdata: description},
-            pubDate: date.toUTCString(),
+            pubDate: pubDate.toUTCString(),
             author,
+            category,
             'content:encoded': {_cdata: description},
             enclosure: {
               _attributes: {
@@ -221,7 +238,7 @@ function getPodcastMiddleware({
             'itunes:subtitle': description,
             'itunes:explicit': 'no',
             'itunes:episodeType': 'full',
-          }
+          })
         }),
       },
     }
@@ -230,6 +247,27 @@ function getPodcastMiddleware({
     res.send(
       convert.js2xml(xmlObj, {compact: true, ignoreComment: true, spaces: 2}),
     )
+
+    function getResourceUrl(id = '') {
+      const baseUrl = new URL(
+        [
+          req.secure ? 'https' : 'http',
+          '://',
+          req.get('host'),
+          req.baseUrl,
+        ].join(''),
+      )
+
+      const resourceUrl = new URL(baseUrl.toString())
+      if (!resourceUrl.pathname.endsWith('/')) {
+        resourceUrl.pathname = `${resourceUrl.pathname}/`
+      }
+      if (id.startsWith('/')) {
+        id = id.slice(1)
+      }
+      resourceUrl.pathname = resourceUrl.pathname + id
+      return resourceUrl.toString()
+    }
   }
 
   async function image(req, res) {
@@ -281,6 +319,16 @@ function getPodcastMiddleware({
   }
 
   return {feed, image, audio}
+}
+
+function removeEmpty(obj) {
+  const newObj = {}
+  for (const [key, value] of Object.entries(obj)) {
+    if (value != null) {
+      newObj[key] = value
+    }
+  }
+  return newObj
 }
 
 export {getPodcastMiddleware}
