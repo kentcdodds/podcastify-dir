@@ -83,7 +83,8 @@ function getPodcastMiddleware({
               copyright = metadata.common.copyright,
               duration = metadata.format.duration,
               narrated_by: narrators = getNativeValue('TXXX:narrated_by'),
-              genre: category,
+              genre: category = getNativeValue('TXXX:book_genre') ||
+                getNativeValue('TXXX:genre'),
               release_date: date = getNativeValue('TXXX:year'),
             } = audibleMetadata
 
