@@ -30,8 +30,6 @@ function getPodcastMiddleware({
   }
 
   async function loadFileMetadataCache() {
-    cache = {}
-
     const files = await fs.promises.readdir(directory)
     const items = await Promise.all(
       files
@@ -125,6 +123,7 @@ function getPodcastMiddleware({
         }),
     )
 
+    cache = {}
     for (const item of items) {
       if (item) {
         cache[item.id] = item
@@ -163,10 +162,12 @@ function getPodcastMiddleware({
     })
 
     // sort
-    const sortOptions = (req.query.sort ?? 'desc:date').split(',').map(set => {
-      const [dir, prop] = set.split(':')
-      return {[dir]: i => i[prop]}
-    })
+    const sortOptions = (req.query.sort ?? 'desc:pubDate')
+      .split(',')
+      .map(set => {
+        const [dir, prop] = set.split(':')
+        return {[dir]: i => i[prop]}
+      })
     items = sort([...items]).by(sortOptions)
 
     const xmlObj = {
@@ -205,16 +206,18 @@ function getPodcastMiddleware({
               : podcastDescription,
           },
           lastBuildDate: new Date().toUTCString(),
-          image: req.query['image.url']
-            ? {
-                link: req.query['image.link'],
-                title: req.query['image.title'],
-                description: req.query['image.description'],
-                height: req.query['image.height'],
-                width: req.query['image.width'],
-                url: req.query['image.url'],
-              }
-            : podcastImage,
+          image: removeEmpty(
+            req.query['image.url']
+              ? {
+                  link: req.query['image.link'],
+                  title: req.query['image.title'],
+                  description: req.query['image.description'],
+                  height: req.query['image.height'],
+                  width: req.query['image.width'],
+                  url: req.query['image.url'],
+                }
+              : podcastImage,
+          ),
           generator: getResourceUrl(),
         },
         item: items.map(item => {
@@ -340,10 +343,18 @@ function getPodcastMiddleware({
       .on('end', () => res.end())
   }
 
-  return {feed, image, audio}
+  async function bustCache(req, res) {
+    await loadFileMetadataCache()
+    res.send('success 🎉')
+  }
+
+  return {feed, image, audio, bustCache}
 }
 
 function removeEmpty(obj) {
+  if (!obj) {
+    return obj
+  }
   const newObj = {}
   for (const [key, value] of Object.entries(obj)) {
     if (value != null) {
