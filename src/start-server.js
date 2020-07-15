@@ -2,10 +2,13 @@ import express from 'express'
 import logger from 'loglevel'
 import {getPodcastRoutes} from './podcast-routes'
 
-function startServer({port = process.env.PORT, ...routeOptions} = {}) {
-  const app = express()
-
-  app.use('/audiobook', getPodcastRoutes(routeOptions))
+function startServer({
+  app = express(),
+  port = process.env.PORT,
+  mountpath = '/audiobook',
+  ...routeOptions
+} = {}) {
+  app.use(mountpath, getPodcastRoutes(routeOptions))
 
   app.use(errorMiddleware)
 

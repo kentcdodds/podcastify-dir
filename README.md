@@ -112,6 +112,15 @@ startServer({
   // the username and password that will allow you to access the feed
   users: {bob: 'the_builder'},
 
+  // this allows you to pass your own express app so you can configure it
+  // however you like. It defaults to creating one itself
+  app: express(),
+
+  // this allows you to specify where you want the routes to be mounted to
+  // by default it's /audiobook, but you could change it to "/" or "/podcast"
+  // if you'd like.
+  mountpath: '/audiobook',
+
   // a little inversion of control here to allow you to modify the JS object
   // that's converted to XML. We're using the `xml-js` npm module so you'll
   // want to make sure your modifications will work with that package's
