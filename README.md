@@ -263,6 +263,11 @@ So you have `title`, `filterIn`, `filterOut`, `sort`, and `image.*` options.
 The fitler query params are a list of comma-separated filter sets which is a
 pair of `[regex]:[property]`. The `sort` is `[direction]:[property]`.
 
+Additionally, the `filterIn` and `filterOut` options can be used multiple times.
+So if you want to filter in "self help" and "career" categories, then you could
+use multiple `filterIn` params. For both `filterIn` and `filterOut`, the item
+must match _all_ of the query options to apply.
+
 Alternatively, you could create individual feeds by starting multiple servers on
 different ports and putting the audio files in different directories.
 

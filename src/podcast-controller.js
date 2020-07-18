@@ -6,6 +6,7 @@ import * as mm from 'music-metadata'
 import convert from 'xml-js'
 
 const atob = data => Buffer.from(data, 'base64').toString()
+const arrayify = val => (Array.isArray(val) ? val : [val].filter(Boolean))
 
 function getPodcastMiddleware({
   title: podcastTitle,
@@ -98,7 +99,10 @@ function getPodcastMiddleware({
 
               description,
               content: description,
-              category: category?.split?.(':').map(c => c.trim()),
+              category: category
+                ?.split?.(':')
+                .map(c => c.trim())
+                .filter(Boolean),
 
               guid: id,
 
@@ -131,35 +135,12 @@ function getPodcastMiddleware({
     }
   }
 
+  // eslint-disable-next-line complexity
   async function feed(req, res) {
-    let items = Object.values(await getFilesMetadata())
+    const items = Object.values(await getFilesMetadata())
 
-    // filter in/out
-    const filterInOptions = (req.query.filterIn ?? '')
-      .split(',')
-      .filter(Boolean)
-      .map(set => {
-        const [regexString, prop] = set.split(':')
-        return {regex: new RegExp(regexString, 'im'), prop}
-      })
-    const filterOutOptions = (req.query.filterOut ?? '')
-      .split(',')
-      .filter(Boolean)
-      .map(set => {
-        const [regexString, prop] = set.split(':')
-        return {regex: new RegExp(regexString, 'im'), prop}
-      })
-    items = items.filter(item => {
-      for (const {regex, prop} of filterInOptions) {
-        if (!item.hasOwnProperty(prop)) return false
-        if (!regex.test(item[prop])) return false
-      }
-      for (const {regex, prop} of filterOutOptions) {
-        if (!item.hasOwnProperty(prop)) break
-        if (regex.test(item[prop])) return false
-      }
-      return true
-    })
+    // filter
+    const filteredItems = filterItems({items, query: req.query})
 
     // sort
     const sortOptions = (req.query.sort ?? 'desc:pubDate')
@@ -168,7 +149,7 @@ function getPodcastMiddleware({
         const [dir, prop] = set.split(':')
         return {[dir]: i => i[prop]}
       })
-    items = sort([...items]).by(sortOptions)
+    const sortedItems = sort([...filteredItems]).by(sortOptions)
 
     const xmlObj = {
       _declaration: {_attributes: {version: '1.0', encoding: 'utf-8'}},
@@ -220,7 +201,7 @@ function getPodcastMiddleware({
           ),
           generator: getResourceUrl(),
         },
-        item: items.map(item => {
+        item: sortedItems.map(item => {
           const {
             id,
             title,
@@ -239,7 +220,7 @@ function getPodcastMiddleware({
             description: {_cdata: description},
             pubDate: pubDate.toUTCString(),
             author,
-            category,
+            category: category.length ? category : null,
             'content:encoded': {_cdata: description},
             enclosure: {
               _attributes: {
@@ -349,6 +330,59 @@ function getPodcastMiddleware({
   }
 
   return {feed, image, audio, bustCache}
+}
+
+function filterItems({items, query}) {
+  // filter
+  let filteredItems = []
+  const filterIns = arrayify(query.filterIn)
+  const filterOuts = arrayify(query.filterOut)
+
+  if (filterIns.length) {
+    for (const filterIn of filterIns) {
+      const filterInOptions = filterIn
+        .split(',')
+        .filter(Boolean)
+        .map(set => {
+          const [regexString, prop] = set.split(':')
+          return {regex: new RegExp(regexString, 'im'), prop}
+        })
+      for (const item of items) {
+        const matches = filterInOptions.every(({regex, prop}) => {
+          let value = item[prop]
+          value = typeof value === 'string' ? value : JSON.stringify(value)
+          return regex.test(value)
+        })
+        if (matches) {
+          filteredItems.push(item)
+        }
+      }
+    }
+  } else {
+    filteredItems = items
+  }
+
+  for (const filterOut of filterOuts) {
+    const filterOutOptions = filterOut
+      .split(',')
+      .filter(Boolean)
+      .map(set => {
+        const [regexString, prop] = set.split(':')
+        return {regex: new RegExp(regexString, 'im'), prop}
+      })
+    for (const item of items) {
+      const matches = filterOutOptions.every(({regex, prop}) => {
+        let value = item[prop]
+        value = typeof value === 'string' ? value : JSON.stringify(value)
+        return regex.test(value)
+      })
+      if (matches) {
+        filteredItems.splice(filteredItems.indexOf(item), 1)
+      }
+    }
+  }
+
+  return filteredItems
 }
 
 function removeEmpty(obj) {
