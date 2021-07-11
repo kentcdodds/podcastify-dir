@@ -87,9 +87,8 @@ function getPodcastMiddleware({
               release_date: date = getNativeValue('TXXX:year'),
             } = audibleMetadata
 
-            const {
-              picture: [picture = getNativeValue('APIC')] = [],
-            } = metadata.common
+            const {picture: [picture = getNativeValue('APIC')] = []} =
+              metadata.common
 
             return {
               id,
@@ -405,5 +404,4 @@ eslint
   max-lines-per-function: "off",
   no-inner-declarations: "off",
   consistent-return: "off",
-  "babel/camelcase": "off",
 */

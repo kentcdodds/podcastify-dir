@@ -361,8 +361,8 @@ MIT
 <!-- prettier-ignore-start -->
 [npm]: https://www.npmjs.com
 [node]: https://nodejs.org
-[build-badge]: https://img.shields.io/travis/com/kentcdodds/podcastify-dir.svg?style=flat-square
-[build]: https://travis-ci.com/kentcdodds/podcastify-dir
+[build-badge]: https://img.shields.io/github/workflow/status/kentcdodds/podcastify-dir/validate?logo=github&style=flat-square
+[build]: https://github.com/kentcdodds/podcastify-dir/actions?query=workflow%3Avalidate
 [coverage-badge]: https://img.shields.io/codecov/c/github/kentcdodds/podcastify-dir.svg?style=flat-square
 [coverage]: https://codecov.io/github/kentcdodds/podcastify-dir
 [version-badge]: https://img.shields.io/npm/v/@kentcdodds/podcastify-dir.svg?style=flat-square

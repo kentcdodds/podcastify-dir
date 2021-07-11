@@ -4,12 +4,11 @@ import rateLimit from 'express-rate-limit'
 import {getPodcastMiddleware} from './podcast-controller'
 
 function getPodcastRoutes({users, ...middlewareOptions} = {}) {
-  // eslint-disable-next-line babel/new-cap
+  // eslint-disable-next-line @babel/new-cap
   const router = express.Router()
 
-  const {feed, image, audio, bustCache} = getPodcastMiddleware(
-    middlewareOptions,
-  )
+  const {feed, image, audio, bustCache} =
+    getPodcastMiddleware(middlewareOptions)
 
   const asyncMiddleware = mid => (req, res, next) =>
     mid(req, res).catch(e => next(e))
