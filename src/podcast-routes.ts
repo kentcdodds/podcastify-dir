@@ -1,17 +1,29 @@
 import express from 'express'
+import type * as ex from 'express'
 import basicAuth from 'express-basic-auth'
 import rateLimit from 'express-rate-limit'
+import type {PodcastMiddlewareOptions} from './podcast-controller'
 import {getPodcastMiddleware} from './podcast-controller'
 
-function getPodcastRoutes({users, ...middlewareOptions} = {}) {
+type Middleware = (
+  req: ex.Request,
+  res: ex.Response,
+  next?: ex.NextFunction,
+) => Promise<void>
+
+function getPodcastRoutes({
+  users,
+  ...middlewareOptions
+}: {users: Record<string, string>} & PodcastMiddlewareOptions) {
   // eslint-disable-next-line @babel/new-cap
   const router = express.Router()
 
   const {feed, image, audio, bustCache} =
     getPodcastMiddleware(middlewareOptions)
 
-  const asyncMiddleware = mid => (req, res, next) =>
-    mid(req, res).catch(e => next(e))
+  const asyncMiddleware: (mid: Middleware) => Middleware =
+    mid => (req, res, next) =>
+      mid(req, res).catch(e => next?.(e))
 
   // can only request the feed 10 times in 10 seconds
   // if something's trying to brute-force the username/password, they'll
@@ -37,8 +49,14 @@ function getPodcastRoutes({users, ...middlewareOptions} = {}) {
     basicAuth({users, challenge: true}),
     asyncMiddleware(feed),
   )
-  router.get('/:id/image', resourceLimit, asyncMiddleware(image))
-  router.get('/:id/audio.mp3', resourceLimit, asyncMiddleware(audio))
+  router.get(
+    /\/(.*?)\/feed\.xml/,
+    feedLimit,
+    basicAuth({users, challenge: true}),
+    asyncMiddleware(feed),
+  )
+  router.get('/resource/:id/image', resourceLimit, asyncMiddleware(image))
+  router.get('/resource/:id/audio.mp3', resourceLimit, asyncMiddleware(audio))
   router.get(
     '/bust-cache',
     rateLimit({windowMs: 1000, max: 1}),

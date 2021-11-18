@@ -1,4 +1,6 @@
+import type * as http from 'http'
 import express from 'express'
+import type * as ex from 'express'
 import logger from 'loglevel'
 import {getPodcastRoutes} from './podcast-routes'
 
@@ -7,27 +9,39 @@ function startServer({
   port = process.env.PORT,
   mountpath = '/audiobook',
   ...routeOptions
-} = {}) {
+}: {
+  app?: express.Application
+  port?: number | string
+  mountpath?: string
+} & Parameters<typeof getPodcastRoutes>['0']): Promise<http.Server> {
   app.use(mountpath, getPodcastRoutes(routeOptions))
 
   app.use(errorMiddleware)
 
   return new Promise(resolve => {
     const server = app.listen(port, () => {
+      // @ts-expect-error server.address() always returns an object for me 🤷‍♂️
       logger.info(`Listening on port ${server.address().port}`)
       const originalClose = server.close.bind(server)
-      server.close = () => {
-        return new Promise(resolveClose => {
-          originalClose(resolveClose)
-        })
-      }
+      Object.assign(server, {
+        close: () => {
+          return new Promise(resolveClose => {
+            originalClose(resolveClose)
+          })
+        },
+      })
       setupCloseOnExit(server)
       resolve(server)
     })
   })
 }
 
-function errorMiddleware(error, req, res, next) {
+function errorMiddleware(
+  error: Error,
+  req: ex.Request,
+  res: ex.Response,
+  next: ex.NextFunction,
+) {
   if (res.headersSent) {
     next(error)
   } else {
@@ -41,16 +55,15 @@ function errorMiddleware(error, req, res, next) {
   }
 }
 
-function setupCloseOnExit(server) {
+function setupCloseOnExit(server: http.Server) {
   // thank you stack overflow
   // https://stackoverflow.com/a/14032965/971592
-  async function exitHandler(options = {}) {
-    await server
-      .close()
+  async function exitHandler(options: {exit?: boolean} = {}) {
+    await (server.close() as unknown as Promise<void>)
       .then(() => {
         logger.info('Server successfully closed')
       })
-      .catch(e => {
+      .catch((e: Error) => {
         logger.warn('Something went wrong closing the server', e.stack)
       })
     // eslint-disable-next-line no-process-exit

@@ -1,2 +1,7 @@
-require('@babel/register')
-require('./src/example')
+const path = require('path')
+require('ts-node').register({
+  transpileOnly: true,
+  files: true,
+  project: path.join(__dirname, './tsconfig.json'),
+})
+require('./src/example.ts')
